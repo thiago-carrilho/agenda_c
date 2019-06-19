@@ -80,19 +80,35 @@ int main()
                 break;
             case 2: //Excluir Contato
                 system("cls||clear");
-                excluir(lista, tamanhoLista);
-                tamanhoLista -= 1;
-                lista = realloc(lista, tamanhoLista * sizeof(contato));
-                system("cls||clear");
-                salvarAlteracoes(lista, tamanhoLista);
-                printf("Contato deletado\n");
+                if (tamanhoLista == 0)
+                {
+                    printf("Nenhum Cadastro na Agenda.\n");
+                    break;
+                }
+                else
+                {
+                    excluir(lista, tamanhoLista);
+                    tamanhoLista -= 1;
+                    lista = realloc(lista, tamanhoLista * sizeof(contato));
+                    system("cls||clear");
+                    salvarAlteracoes(lista, tamanhoLista);
+                    printf("Contato deletado\n");
+                }
                 break;
             case 3: //Editar Contato
                 system("cls||clear");
-                editar(lista, tamanhoLista);
-                salvarAlteracoes(lista, tamanhoLista);
-                printf("Contato editado\n");
-                system("cls||clear");
+                if (tamanhoLista == 0)
+                {
+                    printf("Nenhum Cadastro na Agenda.\n");
+                    break;
+                }
+                else
+                {
+                    editar(lista, tamanhoLista);
+                    salvarAlteracoes(lista, tamanhoLista);
+                    printf("Contato editado\n");
+                    system("cls||clear");
+                }
                 break;
             case 4: //listar
                 system("cls||clear");
@@ -301,6 +317,11 @@ int selecaoId(contato *vLista, int tLista, int opcao)
             printf("Digite uma opcao valida!!\n");
             loopValido = 1;
             break;
+        }
+        if (id > tLista)
+        {
+            printf("Digite um ID entre 1 e %d!!\n", tLista);
+            loopValido = 1;
         }
     }
     return id;
