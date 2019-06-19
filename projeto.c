@@ -39,7 +39,6 @@ int main()
         if (existe == 0)
         {
             tamanhoLista = 1;
-            printf("%d", sizeof(contato));
             lista = malloc(1 * sizeof(contato));
         }
         else
