@@ -61,10 +61,6 @@ int main()
             }
             fclose(arq);
         }
-        printf("\n1 ::: %s %s %d", lista[0].nome, lista[0].telefone, lista[0].idade);
-        printf("\n2 ::: %s %s %d\n", lista[1].nome, lista[1].telefone, lista[1].idade);
-        printf("\n3 ::: %s %s %d", lista[2].nome, lista[2].telefone, lista[2].idade);
-        //FILE *arq = fopen("test2e22.dat", "ab");
         while (qrSair == 0)
         {
             retorno = menu();
@@ -125,10 +121,6 @@ int main()
                 break;
             }
         }
-        //fclose(arq);
-        FILE *arqContador = fopen("contador.txt", "w");
-        fprintf(arqContador, "%d", tamanhoLista);
-        fclose(arqContador);
     }
     return 0;
 }
@@ -139,6 +131,9 @@ void salvarAlteracoes(contato *vLista, int tLista)
     FILE *arqExcluir = fopen("contatos.dat", "wb");
     fclose(arqExcluir);
     FILE *arq = fopen("contatos.dat", "ab");
+    FILE *arqContador = fopen("contador.txt", "w");
+    fprintf(arqContador, "%d", tLista);
+    fclose(arqContador);
     for (contador = 0; contador < tLista; contador++)
     {
         fwrite(&vLista[contador], sizeof(contato), 1, arq);
