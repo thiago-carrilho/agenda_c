@@ -151,7 +151,7 @@ void salvarAlteracoes(contato *vLista, int tLista)
     fclose(arqContador);
     for (contador = 0; contador < tLista; contador++)
     {
-        fwrite(&vLista[contador], sizeof(contato), 1, arq);
+        fwrite(&vLista[contador], sizeof(vLista[contador]), 1, arq);
     }
     fclose(arq);
 }
@@ -169,15 +169,15 @@ void editar(contato *vLista, int tLista)
         {
         case 1: //nome
             printf("\nDigite o novo nome: ");
-            scanf("%s", vLista[id - 1].nome);
+            scanf(" %[^\n]", vLista[id - 1].nome);
             break;
         case 2: //telefone
             printf("\nDigite o novo telefone: ");
-            scanf("%s", vLista[id - 1].telefone);
+            scanf(" %[^\n]", vLista[id - 1].telefone);
             break;
         case 3: //idade
             printf("\nDigite a nova idade: ");
-            scanf("%s", &vLista[id - 1].idade);
+            scanf("%d", &vLista[id - 1].idade);
             break;
         default:
             system("cls||clear");
@@ -249,9 +249,9 @@ void adicionar(contato *vLista, int tLista)
 {
     system("cls||clear");
     printf("Digite o %d nome: ", tLista);
-    scanf(" %s", vLista[tLista - 1].nome);
+    scanf(" %[^\n]", vLista[tLista - 1].nome);
     printf("Digite o telefone: ");
-    scanf(" %s", vLista[tLista - 1].telefone);
+    scanf(" %[^\n]", vLista[tLista - 1].telefone);
     printf("Digite a idade: ");
     scanf("%d", &vLista[tLista - 1].idade);
     system("cls||clear");
@@ -260,7 +260,7 @@ void adicionar(contato *vLista, int tLista)
 int arqExiste()
 {
     FILE *arq;
-    if (arq = fopen("test2e22.dat", "rb"))
+    if (arq = fopen("contatos.dat", "rb"))
     {
         return 1;
     }
