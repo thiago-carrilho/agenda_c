@@ -36,12 +36,7 @@ int main()
     {
         int retorno = 0, qrSair = 0, tamanhoLista = 0, existe = arqExiste();
         contato *lista;
-        if (existe == 0)
-        {
-            tamanhoLista = 1;
-            lista = malloc(1 * sizeof(contato));
-        }
-        else
+        if (existe == 1)
         {
             FILE *arqContador = fopen("contador.txt", "r");
             int contador = 0;
@@ -70,6 +65,10 @@ int main()
                 {
                     tamanhoLista += 1;
                     lista = realloc(lista, tamanhoLista * sizeof(contato));
+                }
+                else{
+                    tamanhoLista = 1;
+                    lista = malloc(1 * sizeof(contato));
                 }
                 adicionar(lista, tamanhoLista);
                 if (existe == 0)
