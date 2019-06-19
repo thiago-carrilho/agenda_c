@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define nomeArqContato "contatos.dat"
+#define nomeArqContador "contador.txt" 
 
 struct sContato
 {
@@ -38,12 +40,12 @@ int main()
         contato *lista;
         if (existe == 1)
         {
-            FILE *arqContador = fopen("contador.txt", "r");
+            FILE *arqContador = fopen(nomeArqContador, "r");
             int contador = 0;
             fscanf(arqContador, "%d", &contador);
             fclose(arqContador);
             lista = malloc(contador * sizeof(contato));
-            FILE *arq = fopen("contatos.dat", "rb");
+            FILE *arq = fopen(nomeArqContato, "rb");
             if (arq == NULL)
             {
                 printf("Erro.");
@@ -61,12 +63,12 @@ int main()
             switch (retorno)
             {
             case 1: //Novo Contato
-                if (existe != 0)
+                if (existe != 0)//se o arquivo já existe, aloca mais 1 contato p/ lista
                 {
                     tamanhoLista += 1;
                     lista = realloc(lista, tamanhoLista * sizeof(contato));
                 }
-                else{
+                else{//se o arquivo não existe, aloca 1 contato p/ lista
                     tamanhoLista = 1;
                     lista = malloc(1 * sizeof(contato));
                 }
@@ -142,10 +144,10 @@ int main()
 void salvarAlteracoes(contato *vLista, int tLista)
 {
     int contador;
-    FILE *arqExcluir = fopen("contatos.dat", "wb");
+    FILE *arqExcluir = fopen(nomeArqContato, "wb");
     fclose(arqExcluir);
-    FILE *arq = fopen("contatos.dat", "ab");
-    FILE *arqContador = fopen("contador.txt", "w");
+    FILE *arq = fopen(nomeArqContato, "ab");
+    FILE *arqContador = fopen(nomeArqContador, "w");
     fprintf(arqContador, "%d", tLista);
     fclose(arqContador);
     for (contador = 0; contador < tLista; contador++)
@@ -259,7 +261,7 @@ void adicionar(contato *vLista, int tLista)
 int arqExiste()
 {
     FILE *arq;
-    if (arq = fopen("contatos.dat", "rb"))
+    if (arq = fopen(nomeArqContato, "rb"))
     {
         return 1;
     }
