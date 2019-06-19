@@ -3,40 +3,28 @@
 
 struct sContato
 {
-    char* nome;
-    char* telefone;
+    char nome[30];
+    char telefone[30];
     int idade;
 } typedef contato;
 
 void tela_inicial();
 int menu();
-void adicionar(contato *, int,FILE *);
-int excluir();
+void adicionar(contato *, int);
+void excluir(contato *, int);
+void editar(contato *, int);
 void listar(contato *, int);
 void procurar(contato *, int, int[]);
 int sair();
 int strLen(char[]);
 int strBuscar(char[], char[]);
+int arqExiste();
+void procurarMenu(contato *, int);
+void removerdoArray(contato *, int, int);
+int selecaoId(contato *, int, int);
+void salvarAlteracoes(contato *, int);
 
 int semTelaInicial = 0;
-
-int carregarDados(contato** vLista,FILE* arq){
-    contato c;
-    int contador;
-    for (contador=1;fscanf(arq, "%s %s %d", c.nome, c.telefone, &c.idade)!= EOF;contador++) {
-        *vLista = realloc(*vLista,contador*sizeof(contato));
-        (*vLista)[contador].nome=c.nome;
-        (*vLista)[contador].telefone=c.telefone;
-        //(*vLista)[contador].idade=&(c.idade);
-    }
-    return contador-1;
-}
-int arqVazio(FILE* arq){
-    if (fgetc(arq)==EOF){
-        return 1;
-    }
-    return 0;
-}
 
 int main()
 {
@@ -46,36 +34,76 @@ int main()
     }
     if (semTelaInicial == 1)
     {
-        FILE* arq = fopen("produ2tos.txt","a+");
-        int retorno = 0, qrSair = 0, tamanhoLista = 0, vazio = arqVazio(arq);
-        contato* lista;
-        if(vazio==1){
-            lista=(contato*) calloc(1,sizeof(contato));
+        int retorno = 0, qrSair = 0, tamanhoLista = 0, existe = arqExiste();
+        contato *lista;
+        if (existe == 0)
+        {
+            tamanhoLista = 1;
+            printf("%d", sizeof(contato));
+            lista = malloc(1 * sizeof(contato));
         }
-        else{
-            tamanhoLista = carregarDados(&lista,arq);
+        else
+        {
+            FILE *arqContador = fopen("contador.txt", "r");
+            int contador = 0;
+            fscanf(arqContador, "%d", &contador);
+            fclose(arqContador);
+            lista = malloc(contador * sizeof(contato));
+            FILE *arq = fopen("contatos.dat", "rb");
+            if (arq == NULL)
+            {
+                printf("Erro.");
+                exit(1);
+            }
+            while (fread(&lista[tamanhoLista], sizeof(contato), 1, arq) == 1)
+            {
+                tamanhoLista += 1;
+            }
+            fclose(arq);
         }
+        printf("\n1 ::: %s %s %d", lista[0].nome, lista[0].telefone, lista[0].idade);
+        printf("\n2 ::: %s %s %d\n", lista[1].nome, lista[1].telefone, lista[1].idade);
+        printf("\n3 ::: %s %s %d", lista[2].nome, lista[2].telefone, lista[2].idade);
+        //FILE *arq = fopen("test2e22.dat", "ab");
         while (qrSair == 0)
         {
             retorno = menu();
             switch (retorno)
             {
             case 1: //Novo Contato
-                tamanhoLista+=1;
-                lista = realloc(lista,tamanhoLista*sizeof(contato));
-                adicionar(lista, tamanhoLista,arq);
+                if (existe != 0)
+                {
+                    tamanhoLista += 1;
+                    lista = realloc(lista, tamanhoLista * sizeof(contato));
+                }
+                adicionar(lista, tamanhoLista);
+                if (existe == 0)
+                    existe = 1;
+                printf("Contato adicionado\n");
+                salvarAlteracoes(lista, tamanhoLista);
                 break;
             case 2: //Excluir Contato
+                system("cls||clear");
+                excluir(lista, tamanhoLista);
+                tamanhoLista -= 1;
+                lista = realloc(lista, tamanhoLista * sizeof(contato));
+                system("cls||clear");
+                salvarAlteracoes(lista, tamanhoLista);
+                printf("Contato deletado\n");
                 break;
             case 3: //Editar Contato
-                //editar();
+                system("cls||clear");
+                editar(lista, tamanhoLista);
+                salvarAlteracoes(lista, tamanhoLista);
+                printf("Contato editado\n");
+                system("cls||clear");
                 break;
-            case 4://listar
+            case 4: //listar
                 system("cls||clear");
                 listar(lista, tamanhoLista);
+                system("cls||clear");
                 break;
             case 5: //procurar
-                //se esse case não tiver chaves não pode declarar variaveis dentro. dá erro.
                 system("cls||clear");
                 if (tamanhoLista == 0)
                 {
@@ -84,84 +112,8 @@ int main()
                 }
                 else
                 {
-                    int escolha = 0, contadorLista, contadordeResultado = 0, resultado = 0, indicesIgual[100] = {[0 ... 99] = -1};
-                    char subString[30];
-                    printf("Digite 1 para pesquisar uma parte do nome\nDigite 2 para pesquisar uma parte do telefone\n\n");
-                    scanf("%d", &escolha);
-                    switch (escolha)
-                    {
-                    case 1:
-                        printf("Digite o nome: ");
-                        scanf(" %s", subString);
-                        for (contadorLista = 0; contadorLista < tamanhoLista; contadorLista++)
-                        {
-                            if (*lista[contadorLista].nome != '\000')
-                            {
-                                resultado = strBuscar(subString, lista[contadorLista].nome);
-                                if (resultado == 1)
-                                {
-                                    if (contadorLista == 0)
-                                    {
-                                        indicesIgual[contadordeResultado] = 0;
-                                    }
-                                    else
-                                    {
-                                        contadordeResultado += 1;
-                                        indicesIgual[contadordeResultado] = contadorLista;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        if (indicesIgual[0] != -1)
-                        {
-                            procurar(lista, contadordeResultado + 1, indicesIgual);
-                        }
-                        else{
-                            printf("Nenhum Cadastro na Agenda com esse nome.\n");
-                        }
-                        break;
-                    case 2:
-                        printf("Digite o telefone: ");
-                        scanf(" %s", subString);
-                        for (contadorLista = 0; contadorLista < tamanhoLista; contadorLista++)
-                        {
-                            if (*lista[contadorLista].telefone != '\000')
-                            {
-                                resultado = strBuscar(subString, lista[contadorLista].telefone);
-                                if (resultado == 1)
-                                {
-                                    if (contadorLista == 0)
-                                    {
-                                        indicesIgual[contadordeResultado] = 0;
-                                    }
-                                    else
-                                    {
-                                        contadordeResultado += 1;
-                                        indicesIgual[contadordeResultado] = contadorLista;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        if (indicesIgual[0] != -1)
-                        {
-                            procurar(lista, contadordeResultado + 1, indicesIgual);
-                        }
-                        else{
-                            printf("Nenhum Cadastro na Agenda com esse telefone.\n");
-                        }
-                        break;
-                    default:
-                        printf("Digite uma opcao valida!");
-                        break;
-                    }
+                    procurarMenu(lista, tamanhoLista);
+                    system("cls||clear");
                     break;
                 }
             case 6:
@@ -173,42 +125,219 @@ int main()
                 break;
             }
         }
-        fclose(arq);
+        //fclose(arq);
+        FILE *arqContador = fopen("contador.txt", "w");
+        fprintf(arqContador, "%d", tamanhoLista);
+        fclose(arqContador);
     }
     return 0;
 }
 
-void adicionar(contato *vLista, int tLista, FILE* arq)
+void salvarAlteracoes(contato *vLista, int tLista)
+{
+    int contador;
+    FILE *arqExcluir = fopen("contatos.dat", "wb");
+    fclose(arqExcluir);
+    FILE *arq = fopen("contatos.dat", "ab");
+    for (contador = 0; contador < tLista; contador++)
+    {
+        fwrite(&vLista[contador], sizeof(contato), 1, arq);
+    }
+    fclose(arq);
+}
+
+void editar(contato *vLista, int tLista)
+{
+    int id = selecaoId(vLista, tLista, 1), escolha = 0, valida = 1, novaIdade = 0;
+    char novoNome[30], novoTelefone[30];
+    while (valida == 1)
+    {
+        valida = 0;
+        printf("\nDigite 1 para editar o nome\nDigite 2 para editar o telefone\nDigite 3 para editar a idade\n\n");
+        scanf("%d", &escolha);
+        switch (escolha)
+        {
+        case 1: //nome
+            printf("\nDigite o novo nome: ");
+            scanf("%s", vLista[id - 1].nome);
+            break;
+        case 2: //telefone
+            printf("\nDigite o novo telefone: ");
+            scanf("%s", vLista[id - 1].telefone);
+            break;
+        case 3: //idade
+            printf("\nDigite a nova idade: ");
+            scanf("%s", &vLista[id - 1].idade);
+            break;
+        default:
+            system("cls||clear");
+            printf("Digite uma opcao valida!!\n");
+            valida = 1;
+            break;
+        }
+    }
+}
+
+void procurarMenu(contato *vLista, int tLista)
+{
+    int escolha = 0, contadorLista, contadordeResultado = 0, resultado = 0, indicesIgual[100] = {[0 ... 99] = -1};
+    char subString[30];
+    printf("Digite 1 para pesquisar uma parte do nome\nDigite 2 para pesquisar uma parte do telefone\n\n");
+    scanf("%d", &escolha);
+    switch (escolha)
+    {
+    case 1:
+        printf("Digite o nome: ");
+        scanf(" %s", subString);
+        for (contadorLista = 0; contadorLista < tLista; contadorLista++)
+        {
+            resultado = strBuscar(subString, vLista[contadorLista].nome);
+            if (resultado == 1)
+            {
+                indicesIgual[contadordeResultado] = contadorLista;
+                contadordeResultado += 1;
+            }
+        }
+        if (indicesIgual[0] != -1)
+        {
+            procurar(vLista, contadordeResultado, indicesIgual);
+        }
+        else
+        {
+            printf("Nenhum Cadastro na Agenda com esse nome.\n");
+        }
+        break;
+    case 2:
+        printf("Digite o telefone: ");
+        scanf(" %s", subString);
+        for (contadorLista = 0; contadorLista < tLista; contadorLista++)
+        {
+
+            resultado = strBuscar(subString, vLista[contadorLista].telefone);
+            if (resultado == 1)
+            {
+                indicesIgual[contadordeResultado] = contadorLista;
+                contadordeResultado += 1;
+            }
+        }
+        if (indicesIgual[0] != -1)
+        {
+            procurar(vLista, contadordeResultado, indicesIgual);
+        }
+        else
+        {
+            printf("Nenhum Cadastro na Agenda com esse telefone.\n");
+        }
+        break;
+    default:
+        printf("Digite uma opcao valida!");
+        break;
+    }
+}
+
+void adicionar(contato *vLista, int tLista)
 {
     system("cls||clear");
-    printf("Digite o nome: ");
-    vLista[tLista].nome=malloc(20*sizeof(char));
-    vLista[tLista].telefone=malloc(20*sizeof(char));
-    scanf(" %[^\n]s", vLista[tLista].nome);
+    printf("Digite o %d nome: ", tLista);
+    scanf(" %s", vLista[tLista - 1].nome);
     printf("Digite o telefone: ");
-    scanf("%s", vLista[tLista].telefone);
+    scanf(" %s", vLista[tLista - 1].telefone);
     printf("Digite a idade: ");
-    scanf("%d", &vLista[tLista].idade);
-    fprintf(arq,"%s %s %d\n",vLista[tLista].nome,vLista[tLista].telefone,vLista[tLista].idade);
+    scanf("%d", &vLista[tLista - 1].idade);
     system("cls||clear");
 }
 
-int excluir()
+int arqExiste()
 {
+    FILE *arq;
+    if (arq = fopen("test2e22.dat", "rb"))
+    {
+        return 1;
+    }
     return 0;
 }
 
-void procurar(contato *vLista, int tLista, int resultados[100]){
-    int contador=0;
+int selecaoId(contato *vLista, int tLista, int opcao)
+{
+    int escolha = 0, id = -1, escolhaProcura = 0, loopValido = 1;
+    while (loopValido != 0)
+    {
+        if (opcao == 0)
+        {
+            printf("Para excluir um contato e necessario saber o ID\nCaso ja saiba digite 1, caso nao digite 2: ");
+        }
+        else if (opcao)
+        {
+            printf("Para editar um contato e necessario saber o ID\nCaso ja saiba digite 1, caso nao digite 2: ");
+        }
+        scanf(" %d", &escolha);
+        loopValido = 0;
+        switch (escolha)
+        {
+        case 1:
+            printf("\nDigite o ID: ");
+            scanf(" %d", &id);
+            break;
+        case 2:
+            printf("\nDigite 1 para listar todos contatos\nDigite 2 para procurar um contato\n\n");
+            scanf(" %d", &escolhaProcura);
+            switch (escolhaProcura)
+            {
+            case 1:
+                listar(vLista, tLista);
+                printf("\nDigite o ID: ");
+                scanf(" %d", &id);
+                break;
+            case 2:
+                printf("\n\n");
+                procurarMenu(vLista, tLista);
+                printf("\nDigite o ID: ");
+                scanf(" %d", &id);
+                break;
+            default:
+                system("cls||clear");
+                printf("Digite uma opcao valida!!\n");
+                loopValido = 1;
+                break;
+            }
+            break;
+        default:
+            system("cls||clear");
+            printf("Digite uma opcao valida!!\n");
+            loopValido = 1;
+            break;
+        }
+    }
+    return id;
+}
+
+void removerdoArray(contato *vLista, int idRemover, int tLista)
+{
+    int contador;
+    for (contador = (idRemover - 1); contador < tLista - 1; contador++)
+    {
+        vLista[contador] = vLista[contador + 1];
+    }
+}
+
+void excluir(contato *vLista, int tLista)
+{
+    int id = selecaoId(vLista, tLista, 0);
+    removerdoArray(vLista, id, tLista);
+}
+
+void procurar(contato *vLista, int tLista, int resultados[100])
+{
+    int contador = 0;
     char continuar;
-    printf("Resultados da Pesquisa\nID | Nome | Telefone | Idade\n");
-    for (contador = 0; contador < tLista; contador++){
-        printf("%d | %s | %s | %d\n", (contador + 1), vLista[resultados[contador]].nome, vLista[resultados[contador]].telefone, vLista[resultados[contador]].idade);
+    printf("\nResultados da Pesquisa\nID | Nome | Telefone | Idade\n");
+    for (contador = 0; contador < tLista; contador++)
+    {
+        printf("%d | %s | %s | %d\n", resultados[contador] + 1, vLista[resultados[contador]].nome, vLista[resultados[contador]].telefone, vLista[resultados[contador]].idade);
     }
     printf("Pressione ENTER para voltar.");
     scanf("%c", &continuar);
     getchar();
-    system("cls||clear");
 }
 
 void listar(contato *vLista, int tLista)
@@ -231,7 +360,6 @@ void listar(contato *vLista, int tLista)
     printf("Pressione ENTER para voltar.");
     scanf("%c", &continuar);
     getchar();
-    system("cls||clear");
     return;
 }
 
@@ -260,7 +388,7 @@ int menu()
 {
     printf("Digite a opcao desejada:\n1 - Novo Contato\n2 - Excluir Contato\n3 - Editar Contato\n4 - Listar Contatos\n5 - Procurar Contato\n6 - Sair\n\n");
     int entrada = 0;
-    scanf("%d", &entrada);
+    scanf(" %d", &entrada);
     return entrada;
 }
 
@@ -294,11 +422,12 @@ int strLen(char string[])
 int strBuscar(char subString[30], char strCompleta[30])
 {
     int tamanhoCompleto = strLen(strCompleta), tamanhoSub = strLen(subString);
-    int contadorStrCompleta=0, contadorSubStr = 0, contadorLista, diferente = 0, temp = 0;
-    while(diferente==0)
-    {   
-        if(strCompleta[contadorStrCompleta]=='\0'){
-            diferente=1;
+    int contadorStrCompleta = 0, contadorSubStr = 0, contadorLista, diferente = 0, temp = 0;
+    while (diferente == 0)
+    {
+        if (strCompleta[contadorStrCompleta] == '\0')
+        {
+            diferente = 1;
         }
         else if (strCompleta[contadorStrCompleta] == subString[contadorSubStr])
         {
@@ -317,7 +446,7 @@ int strBuscar(char subString[30], char strCompleta[30])
                 contadorSubStr += 1;
             }
         }
-    contadorStrCompleta+=1;
+        contadorStrCompleta += 1;
     }
     return 0;
 }
